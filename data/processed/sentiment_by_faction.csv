@@ -1,0 +1,8 @@
+factionId,avg_sentiment_score,total_paragraphs,positive_count,negative_count,neutral_count
+4,0.21610169,236,76,25,135
+23,0.094736844,95,18,9,68
+,0.08888889,45,7,3,35
+13,0.0,29,6,6,17
+3,0.0,5,0,0,5
+7,0.0,1,0,0,1
+14,-1.0,1,0,1,0
