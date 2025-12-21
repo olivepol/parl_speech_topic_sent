@@ -2,9 +2,9 @@ import polars as pl
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-# Load the sample data
+# Load the sample data from raw folder
 data_dir = Path('data')
-sample_path = data_dir / 'df_sample.csv'
+sample_path = data_dir / 'raw' / 'df_sample.csv'
 
 df = pl.read_csv(sample_path)
 
