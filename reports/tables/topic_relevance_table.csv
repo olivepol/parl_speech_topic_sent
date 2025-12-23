@@ -1,0 +1,9 @@
+topic_label,total_speeches,percentage,avg_confidence,avg_sentiment,parties_discussing,unique_speakers
+Gesetzgebung & Verfassungsfragen,652,26.21,0.4029765381501685,-0.023006134969325152,2,460
+Haushalt & Finanzpolitik,379,15.23,0.4489756910787779,-0.07387862796833773,2,290
+"Außen-, Sicherheits- & Menschenrechtspolitik",365,14.67,0.4346361359654585,-0.052054794520547946,2,260
+"Sozial-, Familien- & Gesellschaftspolitik",259,10.41,0.39994732739846667,-0.05019305019305019,2,220
+"Europapolitik, Energie & Klima",242,9.73,0.40488751562104974,-0.028925619834710745,2,202
+"Bildung, Forschung & Zukunftspolitik",207,8.32,0.40007638754395125,-0.043478260869565216,2,179
+Wirtschaft & Arbeitsmarkt,204,8.2,0.37859032876191023,-0.049019607843137254,2,175
+"Staat, Verwaltung & öff. Leistungen",180,7.23,0.3971484903071883,-0.044444444444444446,2,155

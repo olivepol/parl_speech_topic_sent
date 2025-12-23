@@ -2,8 +2,8 @@ import polars as pl
 from pathlib import Path
 
 # Create data directory if it doesn't exist
-data_dir = Path('data')
-data_dir.mkdir(exist_ok=True)
+data_dir = Path('data/raw')
+data_dir.mkdir(parents=True, exist_ok=True)
 
 # Login using e.g. `huggingface-cli login` to access this dataset
 df = pl.read_csv('hf://datasets/emilpartow/german-parliament-speeches/speeches.csv')
