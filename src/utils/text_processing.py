@@ -98,22 +98,25 @@ def batch_process_sentiment(texts: list, model, batch_size: int = 32, show_progr
         texts: List of text strings
         model: SentimentModel instance
         batch_size: Number of texts to process at once
-        show_progress: Whether to show progress
+        show_progress: Whether to show progress bar
         
     Returns:
         Tuple of (sentiments list, probabilities list)
     """
+    from tqdm import tqdm
+    
     sentiments = []
     probabilities_list = []
     
     total_batches = (len(texts) + batch_size - 1) // batch_size
     
-    for i in range(0, len(texts), batch_size):
+    # Create iterator with optional progress bar
+    batch_iterator = range(0, len(texts), batch_size)
+    if show_progress:
+        batch_iterator = tqdm(batch_iterator, total=total_batches, desc="Sentiment analysis")
+    
+    for i in batch_iterator:
         batch = texts[i:i + batch_size]
-        
-        if show_progress:
-            batch_num = i // batch_size + 1
-            print(f"  Processing batch {batch_num}/{total_batches}...", end='\r')
         
         # Process batch
         classes, probs = model.predict_sentiment(batch, output_probabilities=True)
@@ -121,6 +124,6 @@ def batch_process_sentiment(texts: list, model, batch_size: int = 32, show_progr
         probabilities_list.extend(probs)
     
     if show_progress:
-        print(f"  Processed {len(texts)} texts in {total_batches} batches")
+        print(f"\n✓ Processed {len(texts)} texts in {total_batches} batches")
     
     return sentiments, probabilities_list
