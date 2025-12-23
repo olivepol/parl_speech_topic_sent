@@ -1,52 +1,97 @@
 """
-Utility functions for text processing with Polars.
-Uses native Polars expressions for better performance.
+Text processing utilities for parliamentary speech analysis.
+
+This module provides high-performance text processing functions using
+native Polars expressions. Functions are optimized for large datasets
+and avoid slow Python UDFs.
+
+Performance Notes:
+    - Native Polars operations are 10-100x faster than map_elements
+    - Use batch processing for ML model inference
+    - Prefer vectorized operations over row-by-row processing
+
+Functions:
+    trim_to_max_words_native: Trim text to maximum word count
+    add_word_count: Add word count column
+    add_char_count: Add character count column
+
+Example:
+    >>> import polars as pl
+    >>> from src.utils.text_processing import trim_to_max_words_native
+    >>> df = pl.DataFrame({'text': ['This is a very long text...']})
+    >>> df_trimmed = trim_to_max_words_native(df, 'text', max_words=50)
 """
 
 import polars as pl
+from typing import List, Tuple
 
 
-def trim_to_max_words_native(df: pl.DataFrame, col: str, max_words: int = 300) -> pl.DataFrame:
+def trim_to_max_words_native(
+    df: pl.DataFrame, 
+    col: str, 
+    max_words: int = 300
+) -> pl.DataFrame:
     """
     Trim text column to maximum number of words using native Polars operations.
     
-    This is ~10-100x faster than using map_elements with a Python function.
+    This implementation uses Polars' built-in string operations which are
+    significantly faster than Python UDFs (10-100x speedup).
     
     Args:
-        df: Polars DataFrame
+        df: Input Polars DataFrame
         col: Name of the text column to trim
-        max_words: Maximum number of words to keep
+        max_words: Maximum number of words to keep (default: 300)
         
     Returns:
-        DataFrame with trimmed text column
+        DataFrame with the specified column trimmed to max_words
+        
+    Example:
+        >>> df = pl.DataFrame({'speech': ['word ' * 500]})
+        >>> df_trimmed = trim_to_max_words_native(df, 'speech', max_words=100)
+        >>> len(df_trimmed['speech'][0].split())
+        100
     """
     return df.with_columns(
         pl.col(col)
-        .str.split(' ')  # Split into words
-        .list.head(max_words)  # Take first max_words
-        .list.join(' ')  # Join back
+        .str.split(' ')           # Split into list of words
+        .list.head(max_words)     # Take first max_words elements
+        .list.join(' ')           # Join back into string
         .alias(col)
     )
 
 
-def add_word_count(df: pl.DataFrame, text_col: str, count_col: str = 'word_count') -> pl.DataFrame:
+def add_word_count(
+    df: pl.DataFrame, 
+    text_col: str, 
+    count_col: str = 'word_count'
+) -> pl.DataFrame:
     """
-    Add word count column using native Polars expressions.
+    Add a column with word counts for each row.
     
     Args:
-        df: Polars DataFrame
-        text_col: Name of the text column
-        count_col: Name of the output count column
+        df: Input Polars DataFrame
+        text_col: Name of the text column to count words in
+        count_col: Name of the output count column (default: 'word_count')
         
     Returns:
-        DataFrame with word count column added
+        DataFrame with an additional column containing word counts
+        
+    Example:
+        >>> df = pl.DataFrame({'text': ['hello world', 'one two three']})
+        >>> df_with_counts = add_word_count(df, 'text')
+        >>> df_with_counts['word_count'].to_list()
+        [2, 3]
     """
     return df.with_columns(
         pl.col(text_col).str.split(' ').list.len().alias(count_col)
     )
 
 
-def add_char_count(df: pl.DataFrame, text_col: str, count_col: str = 'char_count') -> pl.DataFrame:
+def add_char_count(
+    df: pl.DataFrame, 
+    text_col: str, 
+    count_col: str = 'char_count'
+) -> pl.DataFrame:
     """
     Add character count column using native Polars expressions.
     

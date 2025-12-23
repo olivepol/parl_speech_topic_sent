@@ -1,61 +1,74 @@
-# parl_speech_topic_sent
-Analyzing how policy makers spoke on specific policy topicy in the Bundestag, leveraging NLP.
+# Parliamentary Speech Topic & Sentiment Analysis
 
-research question: “Wie unterscheiden sich Themen und Sentiment zwischen Fraktionen im Deutschen Bundestag über Zeit, und wie verändern sich diese Muster in politischen Krisen?”
+Analyzing how policymakers speak on specific policy topics in the German Bundestag using NLP.
 
-Operationalisierung:
-- Themen = Topics aus Topic Modeling auf speechContent
-- Sentiment = Scores (−, 0, +) aus einem Sentiment-Modell
-- Gruppen = factionId / Partei, positionShort (Minister, MP, Präsidium …)
-- Zeit = date (z.B. nach Legislaturperiode / Jahr / vor/nach Event)
-- Damit hast du eine klar politikwissenschaftliche Frage + spannenden NLP-Teil.
+## Research Question
 
-## Pipeline Execution Order
+**Do SPD and CDU express systematically different sentiment patterns when discussing the same political topics between 2000 and 2021?**
 
-Execute the following scripts and notebooks in this exact order:
+### Operationalization
 
-### 1. Data Preparation
-1. **`scripts/convert_csv_parquet.ipynb`** (optional)
-   - Converts `speeches.csv` to `speeches.parquet` for faster loading
-   - Input: `data/raw/speeches.csv`
-   - Output: `data/raw/speeches.parquet`
+| Variable | Measurement |
+|----------|-------------|
+| Topics | LDA topic modeling on speechContent (15 topics -> 8 after filtering) |
+| Sentiment | Categorical scores (negative=-1, neutral=0, positive=+1) from German BERT |
+| Groups | Political parties via factionId (CDU=4, SPD=23) |
+| Time | Year (2000-2021), aggregated from date column |
 
-2. **`scripts/sample_data.py`**
-   - Creates a random sample of 1000 speeches from the full dataset
-   - Input: `data/raw/speeches.parquet` (or .csv)
-   - Output: `data/raw/df_sample.csv`
+## Project Structure
 
-### 2. Data Cleaning
-3. **`notebooks/data_cleaning.ipynb`**
-   - Cleans and preprocesses the sample data
-   - Input: `data/raw/df_sample.csv`
-   - Output: `data/processed/df_sample_cleaned.csv`
+```
+parl_speech_topic_sent/
+ config/model_params.py      # Centralized model parameters
+ data/
+    raw/                    # Original data
+    interim/                # Intermediate data
+    processed/              # Analysis-ready data
+ notebooks/                  # Jupyter notebooks (01-06)
+ reports/
+    figures/                # Visualizations (PNG)
+    paper/                  # LaTeX research note
+    tables/                 # Statistics (CSV)
+ scripts/                    # Python scripts
+ src/                        # Reusable modules
+ requirements.txt
+```
 
-### 3. Text Segmentation & Preprocessing
-4. **`notebooks/text_segmentation_tokenization_topic.ipynb`**
-   - Splits speeches into paragraphs
-   - Tokenization, lemmatization, and preprocessing for topic modeling
-   - Input: `data/processed/df_sample_cleaned.csv`
-   - Output: `data/interim/df_sample_split.csv`, `data/processed/df_sample_split_preprocessed_topic.parquet`
+## Quick Start
 
-### 4. NLP Analysis (can be run in parallel)
-5. **`notebooks/topic_modeling.ipynb`**
-   - Performs LDA and BERTopic modeling
-   - Input: `data/processed/df_sample_split_preprocessed_topic.parquet`
-   - Output: `data/processed/topic_document_assignments_bert.parquet` (+ various topic model outputs)
+```bash
+pip install -r requirements.txt
+python -m spacy download de_core_news_sm
+huggingface-cli login
+python scripts/import_data.py
+```
 
-6. **`notebooks/sentiment_analysis.ipynb`**
-   - Analyzes sentiment using German sentiment model
-   - Input: `data/interim/df_sample_split.csv`
-   - Output: `data/processed/df_sample_sentiment.parquet`
+Then run notebooks 01-06 in order.
 
-### 5. Merge & Analysis
-7. **`notebooks/merge_analysis_df.ipynb`**
-   - Merges topic and sentiment data
-   - Input: `data/processed/df_sample_sentiment.parquet`, `data/processed/topic_document_assignments_bert.parquet`
-   - Output: `data/processed/df_final_analysis.parquet`
+## Pipeline
 
-8. **`notebooks/final_analysis.ipynb`**
-   - Final visualizations and statistical analysis
-   - Input: `data/processed/df_final_analysis.parquet`
-   - Output: Tables in `reports/tables/`, figures in `reports/figures/`
+| Step | File | Description |
+|------|------|-------------|
+| 0 | scripts/import_data.py | Download from HuggingFace |
+| 1 | scripts/sample_data.py | 50% stratified sample (CDU/SPD, 2000+) |
+| 2 | 01_data_cleaning.ipynb | Clean text |
+| 3 | 02_text_segmentation_tokenization_topic.ipynb | Tokenize |
+| 4 | 03_topic_modeling.ipynb | LDA (15 topics) |
+| 5 | 04_sentiment_analysis.ipynb | German BERT sentiment |
+| 6 | 05_merge_analysis_df.ipynb | Merge data |
+| 7 | 06_final_analysis.ipynb | Visualizations |
+
+## Key Results
+
+**8 Policy Topics:** Economy, Social Policy, Education, Budget, Europe/Climate, Foreign/Security, Public Admin, Legislation
+
+**Findings:**
+- Both parties: predominantly neutral sentiment (mean ~ -0.04)
+- CDU more positive: Economy, Legislation, Budget
+- SPD more positive: Education, Social Policy
+- Most differences not statistically significant
+
+## Data Sources
+
+- [German Parliament Speeches](https://huggingface.co/datasets/emilpartow/german-parliament-speeches)
+- [germansentiment](https://github.com/oliverguhr/german-sentiment-lib)
