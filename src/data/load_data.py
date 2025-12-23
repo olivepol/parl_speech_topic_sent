@@ -1,6 +1,19 @@
 """
-Data loading module for the parliamentary speeches project.
-Handles loading data from various sources (parquet, CSV).
+Data loading utilities for the parliamentary speeches project.
+
+This module provides functions for loading speech data from various formats
+(Parquet, CSV) and creating filtered samples for analysis.
+
+Functions:
+    get_data_dir: Get the project data directory path
+    load_speeches: Load the full speeches dataset
+    load_sample: Load the pre-created sample dataset
+    load_processed: Load any processed data file
+
+Example:
+    >>> from src.data.load_data import load_speeches, load_sample
+    >>> df_full = load_speeches()  # Full dataset
+    >>> df_sample = load_sample()  # Pre-filtered sample
 """
 
 import polars as pl
@@ -9,7 +22,12 @@ from typing import Optional
 
 
 def get_data_dir() -> Path:
-    """Get the data directory path, creating it if it doesn't exist."""
+    """
+    Get the data directory path, creating it if it doesn't exist.
+    
+    Returns:
+        Path to the data/ directory relative to project root
+    """
     data_dir = Path(__file__).parent.parent.parent / 'data'
     data_dir.mkdir(exist_ok=True)
     return data_dir
@@ -28,6 +46,10 @@ def load_speeches(source: str = 'parquet') -> pl.DataFrame:
     Raises:
         FileNotFoundError: If the data file doesn't exist
         ValueError: If source is not 'parquet' or 'csv'
+        
+    Example:
+        >>> df = load_speeches('parquet')
+        >>> print(f"Loaded {df.shape[0]} speeches")
     """
     if source not in ['parquet', 'csv']:
         raise ValueError(f"source must be 'parquet' or 'csv', got {source}")
@@ -35,9 +57,9 @@ def load_speeches(source: str = 'parquet') -> pl.DataFrame:
     data_dir = get_data_dir()
     
     if source == 'parquet':
-        file_path = data_dir / 'speeches.parquet'
+        file_path = data_dir / 'raw' / 'speeches.parquet'
     else:
-        file_path = data_dir / 'speeches.csv'
+        file_path = data_dir / 'raw' / 'speeches.csv'
     
     if not file_path.exists():
         raise FileNotFoundError(f"Data file not found: {file_path}")
